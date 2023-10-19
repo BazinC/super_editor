@@ -1720,12 +1720,12 @@ TextFieldKeyboardHandler ignoreTextFieldKeyCombos(List<ShortcutActivator> keys) 
 /// );
 /// ```
 const defaultTextFieldKeyboardHandlers = <TextFieldKeyboardHandler>[
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnPageUpKeyPress,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnPageDownKeyPress,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnCtrlOrCmdAndHomeKeyPress,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnCtrlOrCmdAndEndKeyPress,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnHomeOnMacOrWeb,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnEndOnMacOrWeb,
+  DefaultSuperTextFieldKeyboardHandlers.scrollOnPageUpKey,
+  DefaultSuperTextFieldKeyboardHandlers.scrollOnPageDown,
+  DefaultSuperTextFieldKeyboardHandlers.scrollToBeginningOfDocumentOnCtrlOrCmdAndHome,
+  DefaultSuperTextFieldKeyboardHandlers.scrollToEndOfDocumentOnCtrlOrCmdAndEnd,
+  DefaultSuperTextFieldKeyboardHandlers.scrollToBeginningOfDocumentOnHomeOnMacOrWeb,
+  DefaultSuperTextFieldKeyboardHandlers.scrollToEndOfDocumentOnEndOnMacOrWeb,
   DefaultSuperTextFieldKeyboardHandlers.copyTextWhenCmdCIsPressed,
   DefaultSuperTextFieldKeyboardHandlers.pasteTextWhenCmdVIsPressed,
   DefaultSuperTextFieldKeyboardHandlers.selectAllTextFieldWhenCmdAIsPressed,
@@ -1772,12 +1772,12 @@ const defaultTextFieldImeKeyboardHandlers = <TextFieldKeyboardHandler>[
   // handlers, passing the key combo to the OS on Mac. Place all custom Mac key
   // combos above this handler.
   DefaultSuperTextFieldKeyboardHandlers.sendKeyEventToMacOs,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnPageUpKeyPress,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnPageDownKeyPress,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnCtrlOrCmdAndHomeKeyPress,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnCtrlOrCmdAndEndKeyPress,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnHomeOnMacOrWeb,
-  DefaultSuperTextFieldKeyboardHandlers.scrollOnEndOnMacOrWeb,
+  DefaultSuperTextFieldKeyboardHandlers.scrollOnPageUpKey,
+  DefaultSuperTextFieldKeyboardHandlers.scrollOnPageDown,
+  DefaultSuperTextFieldKeyboardHandlers.scrollToBeginningOfDocumentOnCtrlOrCmdAndHome,
+  DefaultSuperTextFieldKeyboardHandlers.scrollToEndOfDocumentOnCtrlOrCmdAndEnd,
+  DefaultSuperTextFieldKeyboardHandlers.scrollToBeginningOfDocumentOnHomeOnMacOrWeb,
+  DefaultSuperTextFieldKeyboardHandlers.scrollToEndOfDocumentOnEndOnMacOrWeb,
   DefaultSuperTextFieldKeyboardHandlers.moveCaretToStartOrEnd,
   DefaultSuperTextFieldKeyboardHandlers.moveUpDownLeftAndRightWithArrowKeys,
   DefaultSuperTextFieldKeyboardHandlers.moveToLineStartWithHome,
@@ -2215,7 +2215,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return TextFieldKeyboardHandlerResult.notHandled;
   }
 
-  static TextFieldKeyboardHandlerResult scrollOnPageUpKeyPress({
+  static TextFieldKeyboardHandlerResult scrollOnPageUpKey({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
   }) {
@@ -2260,7 +2260,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return TextFieldKeyboardHandlerResult.handled;
   }
 
-  static TextFieldKeyboardHandlerResult scrollOnPageDownKeyPress({
+  static TextFieldKeyboardHandlerResult scrollOnPageDown({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
   }) {
@@ -2306,7 +2306,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return TextFieldKeyboardHandlerResult.handled;
   }
 
-  static TextFieldKeyboardHandlerResult scrollOnCtrlOrCmdAndHomeKeyPress({
+  static TextFieldKeyboardHandlerResult scrollToBeginningOfDocumentOnCtrlOrCmdAndHome({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
   }) {
@@ -2359,7 +2359,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return TextFieldKeyboardHandlerResult.handled;
   }
 
-  static TextFieldKeyboardHandlerResult scrollOnCtrlOrCmdAndEndKeyPress({
+  static TextFieldKeyboardHandlerResult scrollToEndOfDocumentOnCtrlOrCmdAndEnd({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
   }) {
@@ -2418,7 +2418,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return TextFieldKeyboardHandlerResult.handled;
   }
 
-  static TextFieldKeyboardHandlerResult scrollOnHomeOnMacOrWeb({
+  static TextFieldKeyboardHandlerResult scrollToBeginningOfDocumentOnHomeOnMacOrWeb({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
   }) {
@@ -2434,7 +2434,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
-    if (defaultTargetPlatform != TargetPlatform.macOS && !kIsWeb) {
+    if (defaultTargetPlatform != TargetPlatform.macOS && !isWeb) {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
@@ -2465,7 +2465,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return TextFieldKeyboardHandlerResult.handled;
   }
 
-  static TextFieldKeyboardHandlerResult scrollOnEndOnMacOrWeb({
+  static TextFieldKeyboardHandlerResult scrollToEndOfDocumentOnEndOnMacOrWeb({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
   }) {
@@ -2482,7 +2482,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
-    if (defaultTargetPlatform != TargetPlatform.macOS && !kIsWeb) {
+    if (defaultTargetPlatform != TargetPlatform.macOS && !isWeb) {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
