@@ -2231,7 +2231,9 @@ class DefaultSuperTextFieldKeyboardHandlers {
     final ScrollPosition? ancestorScrollable =
         _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-    if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+    // No scrollable content within `SuperDesktopField` and ancestor scrollable
+    // is absent. But, we technically handled the key event.
+    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
       return TextFieldKeyboardHandlerResult.handled;
     }
 
@@ -2276,7 +2278,9 @@ class DefaultSuperTextFieldKeyboardHandlers {
     final ScrollPosition? ancestorScrollable =
         _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-    if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+    // No scrollable content within `SuperDesktopField` and ancestor scrollable
+    // is absent. But, we technically handled the key event.
+    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
       return TextFieldKeyboardHandlerResult.handled;
     }
 
@@ -2331,7 +2335,9 @@ class DefaultSuperTextFieldKeyboardHandlers {
     final ScrollPosition? ancestorScrollable =
         _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-    if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+    // No scrollable content within `SuperDesktopField` and ancestor scrollable
+    // is absent. But, we technically handled the key event.
+    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
       return TextFieldKeyboardHandlerResult.handled;
     }
 
@@ -2383,7 +2389,9 @@ class DefaultSuperTextFieldKeyboardHandlers {
     final ScrollPosition? ancestorScrollable =
         _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-    if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+    // No scrollable content within `SuperDesktopField` and ancestor scrollable
+    // is absent. But, we technically handled the key event.
+    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
       return TextFieldKeyboardHandlerResult.handled;
     }
 
@@ -2435,7 +2443,9 @@ class DefaultSuperTextFieldKeyboardHandlers {
     final ScrollPosition? ancestorScrollable =
         _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-    if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+    // No scrollable content within `SuperDesktopField` and ancestor scrollable
+    // is absent. But, we technically handled the key event.
+    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
       return TextFieldKeyboardHandlerResult.handled;
     }
 
@@ -2482,7 +2492,9 @@ class DefaultSuperTextFieldKeyboardHandlers {
     final ScrollPosition? ancestorScrollable =
         _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-    if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+    // No scrollable content within `SuperDesktopField` and ancestor scrollable
+    // is absent. But, we technically handled the key event.
+    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
       return TextFieldKeyboardHandlerResult.handled;
     }
 
@@ -2893,7 +2905,9 @@ void _scrollToBeginningOfDocument({
   final TextFieldScroller textFieldScroller = textFieldContext.scroller;
   final ScrollPosition? ancestorScrollable = _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-  if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+  // No scrollable content within `SuperDesktopField` and ancestor scrollable
+  // is absent. But, we technically handled the key event.
+  if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
     return;
   }
 
@@ -2923,7 +2937,9 @@ void _scrollToEndOfDocument({
   final TextFieldScroller textFieldScroller = textFieldContext.scroller;
   final ScrollPosition? ancestorScrollable = _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-  if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+  // No scrollable content within `SuperDesktopField` and ancestor scrollable
+  // is absent. But, we technically handled the key event.
+  if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
     return;
   }
 
@@ -2959,7 +2975,9 @@ void _scrollPageUp({
   final TextFieldScroller textFieldScroller = textFieldContext.scroller;
   final ScrollPosition? ancestorScrollable = _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-  if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+  // No scrollable content within `SuperDesktopField` and ancestor scrollable
+  // is absent. But, we technically handled the key event.
+  if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
     return;
   }
 
@@ -2992,7 +3010,9 @@ void _scrollPageDown({
   final TextFieldScroller textFieldScroller = textFieldContext.scroller;
   final ScrollPosition? ancestorScrollable = _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
 
-  if (ancestorScrollable == null && textFieldScroller.maxScrollExtent == 0) {
+  // No scrollable content within `SuperDesktopField` and ancestor scrollable
+  // is absent. But, we technically handled the key event.
+  if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
     return;
   }
 
