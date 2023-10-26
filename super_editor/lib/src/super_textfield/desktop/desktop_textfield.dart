@@ -2227,38 +2227,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
-    final TextFieldScroller textFieldScroller = textFieldContext.scroller;
-    final ScrollPosition? ancestorScrollable =
-        _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
-
-    // No scrollable content within `SuperDesktopField` and ancestor scrollable
-    // is absent, but we technically handled the task.
-    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    if (textFieldScroller.scrollOffset > 0) {
-      textFieldScroller.animateTo(
-        max(
-          textFieldScroller.scrollOffset - textFieldScroller.viewportDimension,
-          textFieldScroller.minScrollExtent,
-        ),
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.decelerate,
-      );
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    // Ancestor scrollable is absent, but we technically handled the task.
-    if (ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    ancestorScrollable.animateTo(
-      max(ancestorScrollable.pixels - ancestorScrollable.viewportDimension, ancestorScrollable.minScrollExtent),
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.decelerate,
-    );
+    _scrollPageUp(textFieldContext: textFieldContext);
 
     return TextFieldKeyboardHandlerResult.handled;
   }
@@ -2275,38 +2244,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
-    final TextFieldScroller textFieldScroller = textFieldContext.scroller;
-    final ScrollPosition? ancestorScrollable =
-        _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
-
-    // No scrollable content within `SuperDesktopField` and ancestor scrollable
-    // is absent, but we technically handled the task.
-    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    if (textFieldScroller.scrollOffset < textFieldScroller.maxScrollExtent) {
-      textFieldScroller.animateTo(
-        min(
-          textFieldScroller.scrollOffset + textFieldScroller.viewportDimension,
-          textFieldScroller.maxScrollExtent,
-        ),
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.decelerate,
-      );
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    // Ancestor scrollable is absent, but we technically handled the task.
-    if (ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    ancestorScrollable.animateTo(
-      min(ancestorScrollable.pixels + ancestorScrollable.viewportDimension, ancestorScrollable.maxScrollExtent),
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.decelerate,
-    );
+    _scrollPageDown(textFieldContext: textFieldContext);
 
     return TextFieldKeyboardHandlerResult.handled;
   }
@@ -2333,36 +2271,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
-    final TextFieldScroller textFieldScroller = textFieldContext.scroller;
-    final ScrollPosition? ancestorScrollable =
-        _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
-
-    // No scrollable content within `SuperDesktopField` and ancestor scrollable
-    // is absent, but we technically handled the task.
-    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    if (textFieldScroller.scrollOffset > 0) {
-      textFieldScroller.animateTo(
-        textFieldScroller.minScrollExtent,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.decelerate,
-      );
-
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    // Ancestor scrollable is absent, but we technically handled the task.
-    if (ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    ancestorScrollable.animateTo(
-      ancestorScrollable.minScrollExtent,
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.decelerate,
-    );
+    _scrollToBeginningOfDocument(textFieldContext: textFieldContext);
 
     return TextFieldKeyboardHandlerResult.handled;
   }
@@ -2388,41 +2297,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
-    final TextFieldScroller textFieldScroller = textFieldContext.scroller;
-    final ScrollPosition? ancestorScrollable =
-        _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
-
-    // No scrollable content within `SuperDesktopField` and ancestor scrollable
-    // is absent, but we technically handled the task.
-    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    if (textFieldScroller.scrollOffset < textFieldScroller.maxScrollExtent) {
-      textFieldScroller.animateTo(
-        textFieldScroller.maxScrollExtent,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.decelerate,
-      );
-
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    // Ancestor scrollable is absent, but we technically handled the task.
-    if (ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    if (!ancestorScrollable.maxScrollExtent.isFinite) {
-      // Can't scroll to infinity, but we technically handled the task.
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    ancestorScrollable.animateTo(
-      ancestorScrollable.maxScrollExtent,
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.decelerate,
-    );
+    _scrollToEndOfDocument(textFieldContext: textFieldContext);
 
     return TextFieldKeyboardHandlerResult.handled;
   }
@@ -2443,36 +2318,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
-    final TextFieldScroller textFieldScroller = textFieldContext.scroller;
-    final ScrollPosition? ancestorScrollable =
-        _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
-
-    // No scrollable content within `SuperDesktopField` and ancestor scrollable
-    // is absent, but we technically handled the task.
-    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    if (textFieldScroller.scrollOffset > 0) {
-      textFieldScroller.animateTo(
-        textFieldScroller.minScrollExtent,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.decelerate,
-      );
-
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    // Ancestor scrollable is absent, but we technically handled the task.
-    if (ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    ancestorScrollable.animateTo(
-      ancestorScrollable.minScrollExtent,
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.decelerate,
-    );
+    _scrollToBeginningOfDocument(textFieldContext: textFieldContext);
 
     return TextFieldKeyboardHandlerResult.handled;
   }
@@ -2493,41 +2339,7 @@ class DefaultSuperTextFieldKeyboardHandlers {
       return TextFieldKeyboardHandlerResult.notHandled;
     }
 
-    final TextFieldScroller textFieldScroller = textFieldContext.scroller;
-    final ScrollPosition? ancestorScrollable =
-        _findAncestorScrollable(textFieldContext.textFieldBuildContext)?.position;
-
-    // No scrollable content within `SuperDesktopField` and ancestor scrollable
-    // is absent, but we technically handled the task.
-    if (textFieldScroller.maxScrollExtent == 0 && ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    if (textFieldScroller.scrollOffset < textFieldScroller.maxScrollExtent) {
-      textFieldScroller.animateTo(
-        textFieldScroller.maxScrollExtent,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.decelerate,
-      );
-
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    // Ancestor scrollable is absent, but we technically handled the task.
-    if (ancestorScrollable == null) {
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    if (!ancestorScrollable.maxScrollExtent.isFinite) {
-      // Can't scroll to infinity, but we technically handled the task.
-      return TextFieldKeyboardHandlerResult.handled;
-    }
-
-    ancestorScrollable.animateTo(
-      ancestorScrollable.maxScrollExtent,
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.decelerate,
-    );
+    _scrollToEndOfDocument(textFieldContext: textFieldContext);
 
     return TextFieldKeyboardHandlerResult.handled;
   }
