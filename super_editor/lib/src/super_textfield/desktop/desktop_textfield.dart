@@ -2215,6 +2215,11 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return TextFieldKeyboardHandlerResult.notHandled;
   }
 
+  /// Scrolls up by the viewport height, or as high as possible,
+  /// when the user presses the Page Up key.
+  ///
+  /// Scrolls the text field if it has scrollable content, if not then scrolls the
+  /// ancestor scrollable content if one's present.
   static TextFieldKeyboardHandlerResult scrollOnPageUp({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
@@ -2232,6 +2237,11 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
+  /// Scrolls down by the viewport height, or as far as possible,
+  /// when the user presses the Page Down key.
+  ///
+  /// Scrolls the text field if it has scrollable content, if not then scrolls the
+  /// ancestor scrollable content if one's present.
   static TextFieldKeyboardHandlerResult scrollOnPageDown({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
@@ -2249,6 +2259,11 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
+  /// Scrolls the viewport to the top of the content, when the user presses
+  /// CMD + HOME on Mac, or CTRL + HOME on all other platforms.
+  ///
+  /// Scrolls the text field if it has scrollable content, if not then scrolls to the
+  /// top of the ancestor scrollable content if one's present.
   static TextFieldKeyboardHandlerResult scrollToBeginningOfDocumentOnCtrlOrCmdAndHome({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
@@ -2276,6 +2291,11 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
+  /// Scrolls the viewport to the bottom of the content, when the user presses
+  /// CMD + END on Mac, or CTRL + END on all other platforms.
+  ///
+  /// Scrolls the text field if it has scrollable content, if not then scrolls to the
+  /// bottom of the ancestor scrollable content if one's present.
   static TextFieldKeyboardHandlerResult scrollToEndOfDocumentOnCtrlOrCmdAndEnd({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
@@ -2302,6 +2322,11 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
+  /// Scrolls the viewport to the top of the content, when the user presses
+  /// HOME on Mac or web.
+  ///
+  /// Scrolls the text field if it has scrollable content, if not then scrolls to the
+  /// top of the ancestor scrollable content if one's present.
   static TextFieldKeyboardHandlerResult scrollToBeginningOfDocumentOnHomeOnMacOrWeb({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
@@ -2323,6 +2348,11 @@ class DefaultSuperTextFieldKeyboardHandlers {
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
+  /// Scrolls the viewport to the bottom of the content, when the user presses
+  /// END on Mac or web.
+  ///
+  /// Scrolls the text field if it has scrollable content, if not then scrolls to the
+  /// bottom of the ancestor scrollable content if one's present.
   static TextFieldKeyboardHandlerResult scrollToEndOfDocumentOnEndOnMacOrWeb({
     required SuperTextFieldContext textFieldContext,
     required RawKeyEvent keyEvent,
