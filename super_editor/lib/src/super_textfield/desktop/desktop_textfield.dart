@@ -2234,6 +2234,8 @@ class DefaultSuperTextFieldKeyboardHandlers {
 
     final bool scrolled = _scrollPageUp(textFieldContext: textFieldContext);
 
+    /// If scrolled, mark the key event as 'handled', otherwise 'notHandled' to give other
+    /// key handlers opportunity to handle the key event.
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
@@ -2256,6 +2258,8 @@ class DefaultSuperTextFieldKeyboardHandlers {
 
     final bool scrolled = _scrollPageDown(textFieldContext: textFieldContext);
 
+    /// If scrolled, mark the key event as 'handled', otherwise 'notHandled' to give other
+    /// key handlers opportunity to handle the key event.
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
@@ -2288,6 +2292,8 @@ class DefaultSuperTextFieldKeyboardHandlers {
 
     final bool scrolled = _scrollToBeginningOfDocument(textFieldContext: textFieldContext);
 
+    /// If scrolled, mark the key event as 'handled', otherwise 'notHandled' to give other
+    /// key handlers opportunity to handle the key event.
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
@@ -2319,6 +2325,8 @@ class DefaultSuperTextFieldKeyboardHandlers {
 
     final bool scrolled = _scrollToEndOfDocument(textFieldContext: textFieldContext);
 
+    /// If scrolled, mark the key event as 'handled', otherwise 'notHandled' to give other
+    /// key handlers opportunity to handle the key event.
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
@@ -2345,6 +2353,8 @@ class DefaultSuperTextFieldKeyboardHandlers {
 
     final bool scrolled = _scrollToBeginningOfDocument(textFieldContext: textFieldContext);
 
+    /// If scrolled, mark the key event as 'handled', otherwise 'notHandled' to give other
+    /// key handlers opportunity to handle the key event.
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
@@ -2371,6 +2381,8 @@ class DefaultSuperTextFieldKeyboardHandlers {
 
     final bool scrolled = _scrollToEndOfDocument(textFieldContext: textFieldContext);
 
+    /// If scrolled, mark the key event as 'handled', otherwise 'notHandled' to give other
+    /// key handlers opportunity to handle the key event.
     return scrolled ? TextFieldKeyboardHandlerResult.handled : TextFieldKeyboardHandlerResult.notHandled;
   }
 
@@ -2752,9 +2764,7 @@ void _deleteToEndOfLine({
 /// In absence of scrollable content within textfield, tries to scroll the ancestor
 /// scrollable to its top.
 ///
-/// Returns `true` if the scroll was performed, `false` otherwise to give other
-/// key handlers opportunity to handle the key event if we didn't took
-/// any action.
+/// Returns `true` if the scroll is performed, otherwise 'false'.
 bool _scrollToBeginningOfDocument({
   required SuperTextFieldContext textFieldContext,
 }) {
@@ -2799,9 +2809,7 @@ bool _scrollToBeginningOfDocument({
 /// In absence of scrollable content within textfield, tries to scroll the ancestor
 /// scrollable to its end.
 ///
-/// Returns `true` if the scroll was performed, `false` otherwise to give other
-/// key handlers opportunity to handle the key event if we didn't took
-/// any action.
+/// Returns `true` if the scroll is performed, otherwise false.
 bool _scrollToEndOfDocument({
   required SuperTextFieldContext textFieldContext,
 }) {
@@ -2852,9 +2860,7 @@ bool _scrollToEndOfDocument({
 /// In absence of scrollable content within textfield, tries to scroll the ancestor
 /// scrollable up by its viewport height.
 ///
-/// Returns `true` if the scroll was performed, `false` otherwise to give other
-/// key handlers opportunity to handle the key event if we didn't took
-/// any action.
+/// Returns `true` if the scroll is performed, otherwise false.
 bool _scrollPageUp({
   required SuperTextFieldContext textFieldContext,
 }) {
@@ -2900,9 +2906,7 @@ bool _scrollPageUp({
 /// In absence of scrollable content within textfield, tries to scroll the ancestor
 /// scrollable down by its viewport height.
 ///
-/// Returns `true` if the scroll was performed, `false` otherwise to give other
-/// key handlers opportunity to handle the key event if we didn't took
-/// any action.
+/// Returns `true` if the scroll is performed, otherwise false.
 bool _scrollPageDown({
   required SuperTextFieldContext textFieldContext,
 }) {
