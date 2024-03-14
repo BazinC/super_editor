@@ -22,6 +22,7 @@ import 'package:super_editor/src/default_editor/list_items.dart';
 import 'package:super_editor/src/default_editor/tasks.dart';
 import 'package:super_editor/src/infrastructure/_logging.dart';
 import 'package:super_editor/src/infrastructure/content_layers.dart';
+import 'package:super_editor/src/infrastructure/document_gestures.dart';
 import 'package:super_editor/src/infrastructure/documents/document_scaffold.dart';
 import 'package:super_editor/src/infrastructure/documents/document_scroller.dart';
 import 'package:super_editor/src/infrastructure/documents/selection_leader_document_layer.dart';
@@ -132,6 +133,7 @@ class SuperEditor extends StatefulWidget {
     this.createOverlayControlsClipper,
     this.plugins = const {},
     this.debugPaint = const DebugPaintConfig(),
+    this.shrinkWrap = false,
   })  : stylesheet = stylesheet ?? defaultStylesheet,
         selectionStyles = selectionStyle ?? defaultSelectionStyle,
         componentBuilders = componentBuilders != null
@@ -323,6 +325,11 @@ class SuperEditor extends StatefulWidget {
   /// Paints some extra visual ornamentation to help with
   /// debugging.
   final DebugPaintConfig debugPaint;
+
+  /// Whether to shrink wrap the document layout. If true, the document
+  /// layout will be sized to fit its content.
+  /// Quick and dirty fix for our needs
+  final bool shrinkWrap;
 
   @override
   SuperEditorState createState() => SuperEditorState();
@@ -609,6 +616,7 @@ class SuperEditorState extends State<SuperEditor> {
                   scrollController: _scrollController,
                   autoScrollController: _autoScrollController,
                   scroller: _scroller,
+                  shrinkWrap: widget.shrinkWrap,
                   presenter: presenter,
                   componentBuilders: widget.componentBuilders,
                   underlays: [
@@ -790,6 +798,9 @@ class SuperEditorState extends State<SuperEditor> {
           contentTapHandler: _contentTapDelegate,
           scrollController: _scrollController,
           dragHandleAutoScroller: _dragHandleAutoScroller,
+
+          /// todo: expose this as a parameter. Fill an issue
+          dragAutoScrollBoundary: const AxisOffset.symmetric(1),
           showDebugPaint: widget.debugPaint.gestures,
         );
       case DocumentGestureMode.iOS:
@@ -802,6 +813,9 @@ class SuperEditorState extends State<SuperEditor> {
           contentTapHandler: _contentTapDelegate,
           scrollController: _scrollController,
           dragHandleAutoScroller: _dragHandleAutoScroller,
+
+          /// todo: expose this as a parameter. Fill an issue
+          dragAutoScrollBoundary: const AxisOffset.symmetric(1),
           showDebugPaint: widget.debugPaint.gestures,
         );
     }
