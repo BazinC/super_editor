@@ -38,8 +38,6 @@ class EditorToolbar extends StatefulWidget {
   /// The [FocusNode] attached to the editor to which this toolbar applies.
   final FocusNode editorFocusNode;
 
-  final MutableDocument doc;
-
   /// The [editor] is used to alter document content, such as
   /// when the user selects a different block format for a
   /// text blob, e.g., paragraph, header, blockquote, or
@@ -403,7 +401,7 @@ class _EditorToolbarState extends State<EditorToolbar> {
     ]);
 
     // Clear the field and hide the URL bar
-    _urlController!.clear();
+    _urlController!.clearTextAndSelection();
     setState(() {
       _showUrlField = false;
       _urlFocusNode.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
@@ -554,9 +552,6 @@ class _EditorToolbarState extends State<EditorToolbar> {
                   splashRadius: 16,
                   tooltip: 'Bold',
                 ),
-                underline: const SizedBox(),
-                elevation: 0,
-                onChanged: _convertTextToNewType,
               ),
               Center(
                 child: IconButton(
@@ -605,9 +600,6 @@ class _EditorToolbarState extends State<EditorToolbar> {
                   splashRadius: 16,
                   tooltip: 'More options',
                 ),
-                underline: const SizedBox(),
-                elevation: 0,
-                onChanged: _changeAlignment,
               ),
             ],
           ),
@@ -703,7 +695,7 @@ class _EditorToolbarState extends State<EditorToolbar> {
                 setState(() {
                   _urlFocusNode.unfocus();
                   _showUrlField = false;
-                  _urlController!.clear();
+                  _urlController!.clearTextAndSelection();
                 });
               },
             ),
