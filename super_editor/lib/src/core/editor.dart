@@ -631,7 +631,7 @@ class MergeRapidTextInputPolicy implements HistoryGroupingPolicy {
       return TransactionMerge.noOpinion;
     }
 
-    if (newTransaction.firstChangeTime.difference(previousTransaction.lastChangeTime!) > _maxMergeTime) {
+    if (newTransaction.firstChangeTime.difference(previousTransaction.lastChangeTime) > _maxMergeTime) {
       // The text insertions were far enough apart in time that we don't want to merge them.
       return TransactionMerge.noOpinion;
     }
@@ -988,8 +988,52 @@ class FunctionalEditListener implements EditListener {
   void onEdit(List<EditEvent> changeList) => _onEdit(changeList);
 }
 
+/// Extensions that provide direct, type-safe access to [Editable]s that are
+/// expected to exist in all [Editor]s.
+///
+/// This extension is similar to [StandardEditablesInContext], except this extension
+/// operates on an [Editor] and the other operates on [EditContext]s. Both exist
+/// for convenience.
+extension StandardEditables on Editor {
+  /// Finds and returns the [MutableDocument] within the [Editor].
+  MutableDocument get document => context.find<MutableDocument>(Editor.documentKey);
+
+  /// Finds and returns the [MutableDocument] within the [Editor], or `null` if no [MutableDocument]
+  /// is in the [Editor].
+  MutableDocument? get maybeDocument => context.findMaybe<MutableDocument>(Editor.documentKey);
+
+  /// Finds and returns the [MutableDocumentComposer] within the [Editor].
+  MutableDocumentComposer get composer => context.find<MutableDocumentComposer>(Editor.composerKey);
+
+  /// Finds and returns the [MutableDocumentComposer] within the [Editor], or `null` if no
+  /// [MutableDocumentComposer] is in the [Editor].
+  MutableDocumentComposer? get maybeComposer => context.findMaybe<MutableDocumentComposer>(Editor.composerKey);
+}
+
+/// Extensions that provide direct, type-safe access to [Editable]s that are
+/// expected to exist in all [EditContext]s.
+///
+/// This extension is similar to [StandardEditables], except this extension
+/// operates on an [EditContext] and the other operates on [Editor]s. Both exist
+/// for convenience.
+extension StandardEditablesInContext on EditContext {
+  /// Finds and returns the [MutableDocument] within the [EditContext].
+  MutableDocument get document => find<MutableDocument>(Editor.documentKey);
+
+  /// Finds and returns the [MutableDocument] within the [EditContext], or `null` if no [MutableDocument]
+  /// is in the [EditContext].
+  MutableDocument? get maybeDocument => findMaybe<MutableDocument>(Editor.documentKey);
+
+  /// Finds and returns the [MutableDocumentComposer] within the [EditContext].
+  MutableDocumentComposer get composer => find<MutableDocumentComposer>(Editor.composerKey);
+
+  /// Finds and returns the [MutableDocumentComposer] within the [EditContext], or `null` if no
+  /// [MutableDocumentComposer] is in the [EditContext].
+  MutableDocumentComposer? get maybeComposer => findMaybe<MutableDocumentComposer>(Editor.composerKey);
+}
+
 /// An in-memory, mutable [Document].
-class MutableDocument implements Document, Editable {
+class MutableDocument with Iterable<DocumentNode> implements Document, Editable {
   /// Creates an in-memory, mutable version of a [Document].
   ///
   /// Initializes the content of this [MutableDocument] with the given [nodes],
@@ -1026,7 +1070,10 @@ class MutableDocument implements Document, Editable {
   final List<DocumentNode> _nodes;
 
   @override
-  List<DocumentNode> get nodes => UnmodifiableListView(_nodes);
+  int get nodeCount => _nodes.length;
+
+  @override
+  bool get isEmpty => _nodes.isEmpty;
 
   /// Maps a node id to its index in the node list.
   final Map<String, int> _nodeIndicesById = {};
@@ -1035,6 +1082,15 @@ class MutableDocument implements Document, Editable {
   final Map<String, DocumentNode> _nodesById = {};
 
   final _listeners = <DocumentChangeListener>[];
+
+  @override
+  Iterator<DocumentNode> get iterator => _nodes.iterator;
+
+  @override
+  DocumentNode? get firstOrNull => _nodes.lastOrNull;
+
+  @override
+  DocumentNode? get lastOrNull => _nodes.lastOrNull;
 
   @override
   DocumentNode? getNodeById(String nodeId) {
@@ -1206,13 +1262,12 @@ class MutableDocument implements Document, Editable {
   /// ignores the runtime type of the [Document], itself.
   @override
   bool hasEquivalentContent(Document other) {
-    final otherNodes = other.nodes;
-    if (_nodes.length != otherNodes.length) {
+    if (_nodes.length != other.nodeCount) {
       return false;
     }
 
     for (int i = 0; i < _nodes.length; ++i) {
-      if (!_nodes[i].hasEquivalentContent(otherNodes[i])) {
+      if (!_nodes[i].hasEquivalentContent(other.getNodeAt(i)!)) {
         return false;
       }
     }
@@ -1277,7 +1332,7 @@ class MutableDocument implements Document, Editable {
       identical(this, other) ||
       other is MutableDocument &&
           runtimeType == other.runtimeType &&
-          const DeepCollectionEquality().equals(_nodes, other.nodes);
+          const DeepCollectionEquality().equals(_nodes, other._nodes);
 
   @override
   int get hashCode => _nodes.hashCode;
