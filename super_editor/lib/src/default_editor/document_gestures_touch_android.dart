@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -353,12 +354,15 @@ class SuperEditorAndroidToolbarFocalPointDocumentLayerBuilder implements SuperEd
 class SuperEditorAndroidHandlesDocumentLayerBuilder implements SuperEditorLayerBuilder {
   const SuperEditorAndroidHandlesDocumentLayerBuilder({
     this.caretColor,
+    this.caretWidth = 2,
   });
 
   /// The (optional) color of the caret (not the drag handle), by default the color
   /// defers to the root [SuperEditorAndroidControlsScope], or the app theme if the
   /// controls controller has no preference for the color.
   final Color? caretColor;
+
+  final double caretWidth;
 
   @override
   ContentLayerWidget build(BuildContext context, SuperEditorContext editContext) {
@@ -379,6 +383,7 @@ class SuperEditorAndroidHandlesDocumentLayerBuilder implements SuperEditorLayerB
           const ClearComposingRegionRequest(),
         ]);
       },
+      caretWidth: caretWidth,
       caretColor: caretColor,
     );
   }
@@ -467,6 +472,10 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
 
   bool _isCaretDragInProgress = false;
 
+  // Cached view metrics to ignore unnecessary didChangeMetrics calls.
+  Size? _lastSize;
+  ViewPadding? _lastInsets;
+
   @override
   void initState() {
     super.initState();
@@ -489,6 +498,10 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final view = View.of(context);
+    _lastSize = view.physicalSize;
+    _lastInsets = view.viewInsets;
 
     _controlsController = SuperEditorAndroidControlsScope.rootOf(context);
 
@@ -525,6 +538,20 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
 
   @override
   void didChangeMetrics() {
+    // It is possible to get the notification even though the metrics for view are same.
+    final view = View.of(context);
+    final size = view.physicalSize;
+    final insets = view.viewInsets;
+    if (size == _lastSize &&
+        _lastInsets?.left == insets.left &&
+        _lastInsets?.right == insets.right &&
+        _lastInsets?.top == insets.top &&
+        _lastInsets?.bottom == insets.bottom) {
+      return;
+    }
+    _lastSize = size;
+    _lastInsets = insets;
+
     // The available screen dimensions may have changed, e.g., due to keyboard
     // appearance/disappearance. Reflow the layout. Use a post-frame callback
     // to give the rest of the UI a chance to reflow, first.
@@ -706,6 +733,11 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
     }
   }
 
+  void _onTapCancel() {
+    _tapDownLongPressTimer?.cancel();
+    _tapDownLongPressTimer = null;
+  }
+
   // Runs when a tap down has lasted long enough to signify a long-press.
   void _onLongPressDown() {
     _longPressStrategy = AndroidDocumentLongPressSelectionStrategy(
@@ -804,8 +836,6 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
       // already be visible.
       widget.openSoftwareKeyboard();
     }
-
-    _showAndHideEditingControlsAfterTapSelection(didTapOnExistingSelection: didTapOnExistingSelection);
 
     widget.focusNode.requestFocus();
   }
@@ -992,8 +1022,9 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
     if (widget.selection.value?.isCollapsed == true) {
       final caretPosition = widget.selection.value!.extent;
       final tapDocumentOffset = widget.getDocumentLayout().getDocumentOffsetFromAncestorOffset(_globalTapDownOffset!);
-      final tapPosition = widget.getDocumentLayout().getDocumentPositionAtOffset(tapDocumentOffset)!;
-      final isTapOverCaret = caretPosition.isEquivalentTo(tapPosition);
+
+      final tapPosition = widget.getDocumentLayout().getDocumentPositionAtOffset(tapDocumentOffset);
+      final isTapOverCaret = tapPosition != null && caretPosition.isEquivalentTo(tapPosition);
 
       if (isTapOverCaret) {
         _onCaretDragPanStart(details);
@@ -1249,6 +1280,7 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
           (TapSequenceGestureRecognizer recognizer) {
             recognizer
               ..onTapDown = _onTapDown
+              ..onTapCancel = _onTapCancel
               ..onTapUp = _onTapUp
               ..onDoubleTapDown = _onDoubleTapDown
               ..onTripleTapDown = _onTripleTapDown
@@ -1348,6 +1380,7 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
     _controlsController = SuperEditorAndroidControlsScope.rootOf(context);
     // TODO: Replace Cupertino aligner with a generic aligner because this code runs on Android.
     _toolbarAligner = CupertinoPopoverToolbarAligner();
+    widget.selection.addListener(_onSelectionChange);
   }
 
   @override
@@ -1385,8 +1418,25 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
   @visibleForTesting
   bool get wantsToDisplayMagnifier => _controlsController!.shouldShowMagnifier.value;
 
+  /// Returns the `RenderBox` for the scrolling viewport.
+  ///
+  /// If this widget has an ancestor `Scrollable`, then the returned
+  /// `RenderBox` belongs to that ancestor `Scrollable`.
+  ///
+  /// If this widget doesn't have an ancestor `Scrollable`, then this
+  /// widget includes a `ScrollView` and this `State`'s render object
+  /// is the viewport `RenderBox`.
+  RenderBox get viewportBox =>
+      (context.findAncestorScrollableWithVerticalScroll?.context.findRenderObject() ?? context.findRenderObject())
+          as RenderBox;
+
   void _onSelectionChange() {
-    if (widget.selection.value?.isCollapsed == true &&
+    final selection = widget.selection.value;
+    if (selection == null) {
+      return;
+    }
+
+    if (selection.isCollapsed &&
         _controlsController!.shouldShowExpandedHandles.value == true &&
         _dragHandleType == null) {
       // The selection is collapsed, but the expanded handles are visible and the user isn't dragging a handle.
@@ -1399,6 +1449,17 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
         ..hideMagnifier()
         ..hideToolbar()
         ..blinkCaret();
+    }
+
+    if (!selection.isCollapsed && _controlsController!.shouldShowCollapsedHandle.value == true) {
+      // The selection is expanded, but the collapsed handle is visible. This can happen when the
+      // selection is collapsed and the user taps the "Select All" button. There isn't any situation
+      // where the collapsed handle should be visible when the selection is expanded. Hide the collapsed
+      // handle and show the expanded handles.
+      _controlsController!
+        ..hideCollapsedHandle()
+        ..showExpandedHandles()
+        ..hideMagnifier();
     }
   }
 
@@ -1528,11 +1589,12 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
       documentLayout.getDocumentOffsetFromAncestorOffset(_dragHandleSelectionGlobalFocalPoint.value!),
     )!;
 
+    final centerOfContentInContentSpace = documentLayout.getRectForPosition(nearestPosition)!.center;
+
     // Move the magnifier focal point to match the drag x-offset, but always remain focused on the vertical
     // center of the line.
-    final centerOfContentAtNearestPosition = documentLayout.getAncestorOffsetFromDocumentOffset(
-      documentLayout.getRectForPosition(nearestPosition)!.center,
-    );
+    final centerOfContentAtNearestPosition =
+        documentLayout.getAncestorOffsetFromDocumentOffset(centerOfContentInContentSpace);
     _magnifierFocalPoint.value = Offset(
       _magnifierFocalPoint.value!.dx + dragDx,
       centerOfContentAtNearestPosition.dy,
@@ -1562,8 +1624,15 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
     // Update the auto-scroll focal point so that the viewport scrolls if we're
     // close to the boundary.
     widget.dragHandleAutoScroller.value?.updateAutoScrollHandleMonitoring(
-      dragEndInViewport: centerOfContentAtNearestPosition,
+      dragEndInViewport: _contentOffsetInViewport(centerOfContentInContentSpace),
     );
+  }
+
+  /// Converts the [offset] in content space to an offset in the viewport space.
+  Offset _contentOffsetInViewport(Offset offset) {
+    final documentLayout = widget.getDocumentLayout();
+    final globalOffset = documentLayout.getGlobalOffsetFromDocumentOffset(offset);
+    return viewportBox.globalToLocal(globalOffset);
   }
 
   @override

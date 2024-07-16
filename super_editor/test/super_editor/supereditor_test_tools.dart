@@ -163,6 +163,11 @@ class TestSuperEditorConfigurator {
     return this;
   }
 
+  TestSuperEditorConfigurator useIosSelectionHeuristics(bool shouldUse) {
+    _config.useIosSelectionHeuristics = shouldUse;
+    return this;
+  }
+
   TestSuperEditorConfigurator withCaretPolicies({
     bool? displayCaretWithExpandedSelection,
   }) {
@@ -174,6 +179,26 @@ class TestSuperEditorConfigurator {
 
   TestSuperEditorConfigurator withCaretStyle({CaretStyle? caretStyle}) {
     _config.caretStyle = caretStyle;
+    return this;
+  }
+
+  TestSuperEditorConfigurator withIosCaretStyle({
+    double? width,
+    Color? color,
+    double? handleBallDiameter,
+  }) {
+    _config.iosCaretWidth = width;
+    _config.iosHandleColor = color;
+    _config.iosHandleBallDiameter = handleBallDiameter;
+    return this;
+  }
+
+  TestSuperEditorConfigurator withAndroidCaretStyle({
+    double? width,
+    Color? color,
+  }) {
+    _config.androidCaretWidth = width;
+    _config.androidCaretColor = color;
     return this;
   }
 
@@ -224,6 +249,11 @@ class TestSuperEditorConfigurator {
     return this;
   }
 
+  TestSuperEditorConfigurator withHistoryGroupingPolicy(HistoryGroupingPolicy policy) {
+    _config.historyGroupPolicy = policy;
+    return this;
+  }
+
   /// Configures the [SuperEditor] to constrain its maxHeight and maxWidth using the given [size].
   TestSuperEditorConfigurator withEditorSize(ui.Size? size) {
     _config.editorSize = size;
@@ -239,6 +269,14 @@ class TestSuperEditorConfigurator {
   /// Configures the [SuperEditor] to use a custom widget tree above [SuperEditor].
   TestSuperEditorConfigurator withCustomWidgetTreeBuilder(WidgetTreeBuilder? builder) {
     _config.widgetTreeBuilder = builder;
+    return this;
+  }
+
+  /// Configures the [SuperEditor] to display an [AppBar] with the given height above the [SuperEditor].
+  ///
+  /// If [withCustomWidgetTreeBuilder] is used, this setting is ignored.
+  TestSuperEditorConfigurator withAppBar(double height) {
+    _config.appBarHeight = height;
     return this;
   }
 
@@ -389,7 +427,11 @@ class TestSuperEditorConfigurator {
     final layoutKey = _config.layoutKey!;
     final focusNode = _config.focusNode ?? FocusNode();
     final composer = MutableDocumentComposer(initialSelection: _config.selection);
-    final editor = createDefaultDocumentEditor(document: _config.document, composer: composer)
+    final editor = createDefaultDocumentEditor(
+      document: _config.document,
+      composer: composer,
+      historyGroupingPolicy: _config.historyGroupPolicy ?? neverMergePolicy,
+    )
       ..requestHandlers.insertAll(0, _config.addedRequestHandlers)
       ..reactionPipeline.insertAll(0, _config.addedReactions);
 
@@ -418,6 +460,17 @@ class TestSuperEditorConfigurator {
       // Flutter to pick the web shortcuts.
       shortcuts: defaultFlutterShortcuts,
       home: Scaffold(
+        appBar: _config.appBarHeight != null
+            ? PreferredSize(
+                preferredSize: ui.Size(double.infinity, _config.appBarHeight!),
+                child: SafeArea(
+                  child: SizedBox(
+                    height: _config.appBarHeight!,
+                    child: const ColoredBox(color: Colors.yellow),
+                  ),
+                ),
+              )
+            : null,
         body: superEditor,
       ),
       debugShowCheckedModeBanner: false,
@@ -487,8 +540,10 @@ class _TestSuperEditorState extends State<_TestSuperEditor> {
     super.initState();
 
     _iOsControlsController = SuperEditorIosControlsController(
+      useIosSelectionHeuristics: widget.testConfiguration.useIosSelectionHeuristics,
       toolbarBuilder: widget.testConfiguration.iOSToolbarBuilder,
     );
+
     _androidControlsController = SuperEditorAndroidControlsController(
       toolbarBuilder: widget.testConfiguration.androidToolbarBuilder,
     );
@@ -530,8 +585,6 @@ class _TestSuperEditorState extends State<_TestSuperEditor> {
       autofocus: widget.testConfiguration.autoFocus,
       tapRegionGroupId: widget.testConfiguration.tapRegionGroupId,
       editor: widget.testDocumentContext.editor,
-      document: widget.testDocumentContext.document,
-      composer: widget.testDocumentContext.composer,
       documentLayoutKey: widget.testDocumentContext.layoutKey,
       inputSource: widget.testConfiguration.inputSource,
       selectionPolicies: widget.testConfiguration.selectionPolicies ?? const SuperEditorSelectionPolicies(),
@@ -562,13 +615,18 @@ class _TestSuperEditorState extends State<_TestSuperEditor> {
 
   List<SuperEditorLayerBuilder> _createOverlayBuilders() {
     // We show the default overlays except in the cases where we want to hide the caret
-    // or use a custom `CaretStyle`. In those case, we don't include the defaults - we provide
+    // or use a custom caret style. In those case, we don't include the defaults - we provide
     // a configured caret overlay builder, instead.
     //
     // If you introduce further configuration to overlay builders, make sure that in the default
     // situation, we're using `defaultSuperEditorDocumentOverlayBuilders`, so that most tests
     // verify the defaults that most apps will use.
-    if (widget.testConfiguration.displayCaretWithExpandedSelection && widget.testConfiguration.caretStyle == null) {
+    if (widget.testConfiguration.displayCaretWithExpandedSelection &&
+        widget.testConfiguration.caretStyle == null &&
+        widget.testConfiguration.iosCaretWidth == null &&
+        widget.testConfiguration.iosHandleColor == null &&
+        widget.testConfiguration.iosHandleBallDiameter == null &&
+        widget.testConfiguration.androidCaretWidth == null) {
       return defaultSuperEditorDocumentOverlayBuilders;
     }
 
@@ -578,13 +636,20 @@ class _TestSuperEditorState extends State<_TestSuperEditor> {
       // iOS floating toolbar.
       const SuperEditorIosToolbarFocalPointDocumentLayerBuilder(),
       // Displays caret and drag handles, specifically for iOS.
-      const SuperEditorIosHandlesDocumentLayerBuilder(),
+      SuperEditorIosHandlesDocumentLayerBuilder(
+        caretWidth: widget.testConfiguration.iosCaretWidth,
+        handleColor: widget.testConfiguration.iosHandleColor,
+        handleBallDiameter: widget.testConfiguration.iosHandleBallDiameter,
+      ),
 
       // Adds a Leader around the document selection at a focal point for the
       // Android floating toolbar.
       const SuperEditorAndroidToolbarFocalPointDocumentLayerBuilder(),
       // Displays caret and drag handles, specifically for Android.
-      const SuperEditorAndroidHandlesDocumentLayerBuilder(),
+      SuperEditorAndroidHandlesDocumentLayerBuilder(
+        caretWidth: widget.testConfiguration.androidCaretWidth ?? 2.0,
+        caretColor: widget.testConfiguration.androidCaretColor,
+      ),
 
       // Displays caret for typical desktop use-cases.
       DefaultCaretOverlayBuilder(
@@ -613,11 +678,23 @@ class SuperEditorTestConfiguration {
   ScrollController? scrollController;
   bool insideCustomScrollView = false;
   DocumentGestureMode? gestureMode;
+  HistoryGroupingPolicy? historyGroupPolicy;
   TextInputSource? inputSource;
   SuperEditorSelectionPolicies? selectionPolicies;
   SelectionStyles? selectionStyles;
   bool displayCaretWithExpandedSelection = true;
   CaretStyle? caretStyle;
+
+  // By default we don't use iOS-style selection heuristics in tests because in tests
+  // we want to know exactly where we're placing the caret.
+  bool useIosSelectionHeuristics = false;
+  double? iosCaretWidth;
+  Color? iosHandleColor;
+  double? iosHandleBallDiameter;
+
+  double? androidCaretWidth;
+  Color? androidCaretColor;
+
   SoftwareKeyboardController? softwareKeyboardController;
   SuperEditorImePolicies? imePolicies;
   SuperEditorImeConfiguration? imeConfiguration;
@@ -634,6 +711,7 @@ class SuperEditorTestConfiguration {
   final plugins = <SuperEditorPlugin>{};
 
   WidgetTreeBuilder? widgetTreeBuilder;
+  double? appBarHeight;
 }
 
 /// Must return a widget tree containing the given [superEditor]
@@ -789,35 +867,34 @@ class EquivalentDocumentMatcher extends Matcher {
     bool nodeCountMismatch = false;
     bool nodeTypeOrContentMismatch = false;
 
-    if (_expectedDocument.nodes.length != actualDocument.nodes.length) {
-      messages
-          .add("expected ${_expectedDocument.nodes.length} document nodes but found ${actualDocument.nodes.length}");
+    if (_expectedDocument.nodeCount != actualDocument.nodeCount) {
+      messages.add("expected ${_expectedDocument.nodeCount} document nodes but found ${actualDocument.nodeCount}");
       nodeCountMismatch = true;
     } else {
       messages.add("document have the same number of nodes");
     }
 
-    final maxNodeCount = max(_expectedDocument.nodes.length, actualDocument.nodes.length);
+    final maxNodeCount = max(_expectedDocument.nodeCount, actualDocument.nodeCount);
     final nodeComparisons = List.generate(maxNodeCount, (index) => ["", "", " "]);
     for (int i = 0; i < maxNodeCount; i += 1) {
-      if (i < _expectedDocument.nodes.length && i < actualDocument.nodes.length) {
-        nodeComparisons[i][0] = _expectedDocument.nodes[i].runtimeType.toString();
-        nodeComparisons[i][1] = actualDocument.nodes[i].runtimeType.toString();
+      if (i < _expectedDocument.nodeCount && i < actualDocument.nodeCount) {
+        nodeComparisons[i][0] = _expectedDocument.getNodeAt(i)!.runtimeType.toString();
+        nodeComparisons[i][1] = actualDocument.getNodeAt(i)!.runtimeType.toString();
 
-        if (_expectedDocument.nodes[i].runtimeType != actualDocument.nodes[i].runtimeType) {
+        if (_expectedDocument.getNodeAt(i)!.runtimeType != actualDocument.getNodeAt(i)!.runtimeType) {
           nodeComparisons[i][2] = "Wrong Type";
           nodeTypeOrContentMismatch = true;
-        } else if (!_expectedDocument.nodes[i].hasEquivalentContent(actualDocument.nodes[i])) {
+        } else if (!_expectedDocument.getNodeAt(i)!.hasEquivalentContent(actualDocument.getNodeAt(i)!)) {
           nodeComparisons[i][2] = "Different Content";
           nodeTypeOrContentMismatch = true;
         }
-      } else if (i < _expectedDocument.nodes.length) {
-        nodeComparisons[i][0] = _expectedDocument.nodes[i].runtimeType.toString();
+      } else if (i < _expectedDocument.nodeCount) {
+        nodeComparisons[i][0] = _expectedDocument.getNodeAt(i)!.runtimeType.toString();
         nodeComparisons[i][1] = "NA";
         nodeComparisons[i][2] = "Missing Node";
-      } else if (i < actualDocument.nodes.length) {
+      } else if (i < actualDocument.nodeCount) {
         nodeComparisons[i][0] = "NA";
-        nodeComparisons[i][1] = actualDocument.nodes[i].runtimeType.toString();
+        nodeComparisons[i][1] = actualDocument.getNodeAt(i)!.runtimeType.toString();
         nodeComparisons[i][2] = "Missing Node";
       }
     }
@@ -862,7 +939,7 @@ class FakeImageComponentBuilder implements ComponentBuilder {
     return ImageComponent(
       componentKey: componentContext.componentKey,
       imageUrl: componentViewModel.imageUrl,
-      selection: componentViewModel.selection,
+      selection: componentViewModel.selection?.nodeSelection as UpstreamDownstreamNodeSelection?,
       selectionColor: componentViewModel.selectionColor,
       imageBuilder: (context, imageUrl) => ColoredBox(
         color: fillColor ?? Colors.transparent,

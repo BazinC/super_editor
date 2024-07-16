@@ -84,8 +84,8 @@ class IOSSelectionHandle extends StatelessWidget {
             ),
           ),
         Container(
-          width: 2,
-          height: caretHeight + ballRadius,
+          width: caretWidth,
+          height: caretHeight,
           color: color,
         ),
         // Show the ball on the bottom for a downstream handle
@@ -131,7 +131,7 @@ class IOSCollapsedHandle extends StatelessWidget {
       controller: controller,
       caretOffset: Offset.zero,
       caretHeight: caretHeight,
-      width: 2,
+      width: caretWidth,
       color: color,
       borderRadius: BorderRadius.zero,
       isTextEmpty: false,

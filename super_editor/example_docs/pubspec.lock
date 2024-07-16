@@ -39,7 +39,7 @@ packages:
       path: "../../attributed_text"
       relative: true
     source: path
-    version: "0.3.0"
+    version: "0.3.2"
   boolean_selector:
     dependency: transitive
     description:
@@ -136,6 +136,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.0"
+  fixnum:
+    dependency: transitive
+    description:
+      name: fixnum
+      sha256: "25517a4deb0c03aa0f32fd12db525856438902d9c16536311e76cdc57b31d7d1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -158,10 +166,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_test_robots
-      sha256: bccae4f8d67d0bc0c79d1c31f4dc2db09beb35545563a5bd27d0a792c9d26446
+      sha256: "3b00f2081148bde55190997c2772f934ad2f4529cbcfc4ccfa593f8ddc117a28"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.23"
+    version: "0.0.24"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -171,10 +179,10 @@ packages:
     dependency: "direct main"
     description:
       name: follow_the_leader
-      sha256: "71f4bfca904974a98d21558bbf7489e1262da6ac46de912791fe84cf6516b9ae"
+      sha256: "798baf5211ca2461c8462d4c8e94f57bf989758f8204056d607eb9a20f1cf794"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.4+7"
+    version: "0.0.4+8"
   frontend_server_client:
     dependency: transitive
     description:
@@ -291,10 +299,10 @@ packages:
     dependency: transitive
     description:
       name: markdown
-      sha256: "01512006c8429f604eb10f9848717baeaedf99e991d14a50d540d9beff08e5c6"
+      sha256: "39caf989ccc72c63e87b961851a74257141938599ed2db45fbd9403fee0db423"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.1"
+    version: "5.0.0"
   matcher:
     dependency: transitive
     description:
@@ -336,13 +344,13 @@ packages:
     source: hosted
     version: "2.0.2"
   overlord:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: overlord
-      sha256: "311b50446ec227beafc114968101ae623046cf27887f43c916fa7c5131a145b6"
+      sha256: "576256bc9ce3fb0ae3042bbb26eed67bdb26a5045dd7e3c851aae65b0bbab2f5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.3+4"
+    version: "0.0.3+5"
   package_config:
     dependency: transitive
     description:
@@ -500,6 +508,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.0"
+  sprintf:
+    dependency: transitive
+    description:
+      name: sprintf
+      sha256: "1fc9ffe69d4df602376b52949af107d8f5703b77cda567c4d7d86a0693120f23"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.0"
   stack_trace:
     dependency: transitive
     description:
@@ -530,7 +546,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.2.6-dev.1"
+    version: "0.3.0-dev.1"
   super_editor_markdown:
     dependency: "direct overridden"
     description:
@@ -653,10 +669,10 @@ packages:
     dependency: transitive
     description:
       name: uuid
-      sha256: "648e103079f7c64a36dc7d39369cabb358d377078a051d6ae2ad3aa539519313"
+      sha256: "814e9e88f21a176ae1359149021870e87f7cddaf633ab678a5d2b0bff7fd1ba8"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.7"
+    version: "4.4.0"
   vector_math:
     dependency: transitive
     description:
@@ -669,10 +685,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: e7d5ecd604e499358c5fe35ee828c0298a320d54455e791e9dcf73486bc8d9f0
+      sha256: "3923c89304b715fb1eb6423f017651664a03bf5f4b29983627c4da791f74a4ec"
       url: "https://pub.dev"
     source: hosted
-    version: "14.1.0"
+    version: "14.2.1"
   watcher:
     dependency: transitive
     description:

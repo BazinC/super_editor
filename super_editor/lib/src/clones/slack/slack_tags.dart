@@ -219,6 +219,16 @@ class FillInComposingSlackTagCommand implements EditCommand {
     // Reset the tag index so that we're no longer composing a tag.
     tagIndex._composingSlackTag.value = null;
   }
+
+  @override
+  String describe() {
+    // TODO: implement describe
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement historyBehavior
+  HistoryBehavior get historyBehavior => throw UnimplementedError();
 }
 
 /// An [EditRequest] that cancels an on-going slack tag composition near the user's selection.
@@ -272,6 +282,16 @@ class CancelComposingSlackTagCommand implements EditCommand {
       executor.executeCommand(removeComposingAttributionCommand);
     }
   }
+
+  @override
+  String describe() {
+    // TODO: implement describe
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement historyBehavior
+  HistoryBehavior get historyBehavior => throw UnimplementedError();
 }
 
 EditCommand? removeSlackComposingTokenAttribution(Document document, SlackTagIndex tagIndex) {
@@ -780,6 +800,11 @@ class SlackTagReaction implements EditReaction {
       isTokenCandidate: tagSelector,
     );
   }
+
+  @override
+  void modifyContent(EditContext editorContext, RequestDispatcher requestDispatcher, List<EditEvent> changeList) {
+    // TODO: implement modifyContent
+  }
 }
 
 typedef OnUpdateComposingSlackTag = void Function(ComposingSlackTag? composingSlackTag);
@@ -889,6 +914,11 @@ class SlackTagIndex with ChangeNotifier implements Editable {
       _didChange = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void reset() {
+    // TODO: implement reset
   }
 }
 
@@ -1342,6 +1372,11 @@ class AdjustSelectionAroundSlackTagReaction implements EditReaction {
         SelectionReason.contentChange,
       ),
     ]);
+  }
+
+  @override
+  void modifyContent(EditContext editorContext, RequestDispatcher requestDispatcher, List<EditEvent> changeList) {
+    // TODO: implement modifyContent
   }
 }
 

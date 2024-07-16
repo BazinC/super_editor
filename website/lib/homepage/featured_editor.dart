@@ -64,10 +64,6 @@ class _FeaturedEditorState extends State<FeaturedEditor> {
     // content changes to the Document.
     _docEditor = createDefaultDocumentEditor(document: _doc, composer: _composer);
 
-    // Create the DocumentEditor, which is responsible for applying all
-    // content changes to the Document.
-    _docEditor = createDefaultDocumentEditor(document: _doc, composer: _composer);
-
     // Create a FocusNode so that we can explicitly toggle editor focus.
     _editorFocusNode = FocusNode();
   }
@@ -166,7 +162,6 @@ class _FeaturedEditorState extends State<FeaturedEditor> {
       document: _doc,
       anchor: _selectionLayerLinks.expandedSelectionBoundsLink,
       editor: _docEditor,
-      document: _doc,
       composer: _composer,
       closeToolbar: _hideEditorToolbar,
     );

@@ -71,6 +71,10 @@ class TextDeltasDocumentEditor {
       composing: _serializedDoc.documentToImeRange(_serializedDoc.composingRegion),
     );
 
+    // Start an editor transaction so that all changes made during this delta
+    // application is considered a single undo-able change.
+    editor.startTransaction();
+
     for (final delta in textEditingDeltas) {
       editorImeLog.info("---------------------------------------------------");
 
@@ -101,12 +105,17 @@ class TextDeltasDocumentEditor {
 
     DocumentRange? docComposingRegion = _calculateNewComposingRegion(textEditingDeltas);
 
-    editor.execute([
-      ChangeComposingRegionRequest(
-        docComposingRegion,
-      ),
-    ]);
+    if (docComposingRegion != composingRegion.value) {
+      editor.execute([
+        ChangeComposingRegionRequest(
+          docComposingRegion,
+        ),
+      ]);
+    }
     editorImeLog.fine("Document composing region: ${composingRegion.value}");
+
+    // End the editor transaction for all deltas in this call.
+    editor.endTransaction();
 
     _nextImeValue = null;
   }
@@ -180,14 +189,7 @@ class TextDeltasDocumentEditor {
       selection.value!,
       composingRegion.value,
       _serializedDoc.didPrependPlaceholder ? PrependedCharacterPolicy.include : PrependedCharacterPolicy.exclude,
-    )..imeText = _previousImeValue.text;
-
-    // The delta's composing region is based on the content after insertion, so we
-    // apply the composing region here instead of during insertion operation above.
-    final insertionComposingRegion = _serializedDoc.imeToDocumentRange(delta.composing);
-    editor.execute([
-      ChangeComposingRegionRequest(insertionComposingRegion),
-    ]);
+    );
   }
 
   void _applyReplacement(TextEditingDeltaReplacement delta) {
@@ -230,14 +232,7 @@ class TextDeltasDocumentEditor {
       selection.value!,
       composingRegion.value,
       _serializedDoc.didPrependPlaceholder ? PrependedCharacterPolicy.include : PrependedCharacterPolicy.exclude,
-    )..imeText = _previousImeValue.text;
-
-    // The delta's composing region is based on the content after insertion, so we
-    // apply the composing region here instead of during the replacement operation above.
-    final insertionComposingRegion = _serializedDoc.imeToDocumentRange(delta.composing);
-    editor.execute([
-      ChangeComposingRegionRequest(insertionComposingRegion),
-    ]);
+    );
   }
 
   void _applyDeletion(TextEditingDeltaDeletion delta) {
@@ -287,13 +282,6 @@ class TextDeltasDocumentEditor {
     editorImeLog
         .fine("Updating the Document Composer's selection to place caret at insertion offset:\n$insertionSelection");
     final selectionBeforeInsertion = selection.value;
-    editor.execute([
-      ChangeSelectionRequest(
-        insertionSelection,
-        SelectionChangeType.placeCaret,
-        SelectionReason.userInteraction,
-      ),
-    ]);
 
     editorImeLog.fine("Inserting the text at the Document Composer's selection");
     final didInsert = _insertPlainText(
@@ -345,6 +333,11 @@ class TextDeltasDocumentEditor {
     editorOpsLog.fine("Executing text insertion command.");
     editorOpsLog.finer("Text before insertion: '${insertionNode.text.text}'");
     editor.execute([
+      ChangeSelectionRequest(
+        DocumentSelection.collapsed(position: insertionPosition),
+        SelectionChangeType.placeCaret,
+        SelectionReason.userInteraction,
+      ),
       InsertTextRequest(
         documentPosition: insertionPosition,
         textToInsert: text,
@@ -543,6 +536,14 @@ class TextDeltasDocumentEditor {
         ]);
       }
     } else if (extentNode is TaskNode) {
+      if (extentNode.text.text.isEmpty) {
+        // The task is empty. Convert it to a paragraph.
+        editor.execute([
+          ConvertTextNodeToParagraphRequest(nodeId: extentNode.id),
+        ]);
+        return;
+      }
+
       final splitOffset = (caretPosition.nodePosition as TextNodePosition).offset;
 
       editor.execute([
@@ -642,6 +643,20 @@ class TextDeltasDocumentEditor {
         ),
       );
     }
+
+    if (_serializedDoc.imeText.length < lastDelta.composing.end) {
+      // The IME is composing, but the composing region is out of our text bounds. This can happen if the delta
+      // handling causes our text to be smaller than the IME's text.
+      //
+      // For example, when using the markdown plugin, typing "~b~" causes the text to be converted to "b"
+      // with strikethrough. The ~ character triggers a composition start, but the IME's composing region is still
+      // at the end of "~b~", which is out of our text bounds. This out of bounds index causes our IME range
+      // mapping to fail.
+      //
+      // Clear the composing region.
+      return null;
+    }
+
     return _serializedDoc.imeToDocumentRange(lastDelta.composing);
   }
 }

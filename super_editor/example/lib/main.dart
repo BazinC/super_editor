@@ -11,13 +11,12 @@ import 'package:example/demos/demo_selectable_text.dart';
 import 'package:example/demos/editor_configs/demo_mobile_editing_android.dart';
 import 'package:example/demos/editor_configs/demo_mobile_editing_ios.dart';
 import 'package:example/demos/example_editor/example_editor.dart';
-import 'package:example/demos/in_the_lab/feature_action_tags.dart';
-import 'package:example/demos/in_the_lab/feature_pattern_tags.dart';
-import 'package:example/demos/in_the_lab/feature_slack_tags.dart';
-import 'package:example/demos/in_the_lab/feature_stable_tags.dart';
 import 'package:example/demos/flutter_features/demo_inline_widgets.dart';
 import 'package:example/demos/flutter_features/textinputclient/basic_text_input_client.dart';
 import 'package:example/demos/flutter_features/textinputclient/textfield.dart';
+import 'package:example/demos/in_the_lab/feature_action_tags.dart';
+import 'package:example/demos/in_the_lab/feature_pattern_tags.dart';
+import 'package:example/demos/in_the_lab/feature_stable_tags.dart';
 import 'package:example/demos/in_the_lab/selected_text_colors_demo.dart';
 import 'package:example/demos/interaction_spot_checks/toolbar_following_content_in_layer.dart';
 import 'package:example/demos/scrolling/demo_task_and_chat_with_customscrollview.dart';
@@ -26,8 +25,6 @@ import 'package:example/demos/styles/demo_doc_styles.dart';
 import 'package:example/demos/super_reader/demo_super_reader.dart';
 import 'package:example/demos/supertextfield/demo_textfield.dart';
 import 'package:example/demos/supertextfield/ios/demo_superiostextfield.dart';
-import 'package:example/logging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -37,6 +34,7 @@ import 'package:super_editor/super_editor.dart';
 import 'demos/demo_attributed_text.dart';
 import 'demos/demo_document_loses_focus.dart';
 import 'demos/demo_switch_document_content.dart';
+import 'demos/in_the_lab/feature_slack_tags.dart';
 import 'demos/super_reader/demo_read_only_scrolling_document.dart';
 import 'demos/supertextfield/android/demo_superandroidtextfield.dart';
 
@@ -578,12 +576,12 @@ class _DrawerButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         style: ButtonStyle(
-            backgroundColor: MaterialStateColor.resolveWith((states) {
+            backgroundColor: WidgetStateColor.resolveWith((states) {
               if (isSelected) {
                 return const Color(0xFFBBBBBB);
               }
 
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return Colors.grey.withOpacity(0.1);
               }
 
@@ -591,9 +589,9 @@ class _DrawerButton extends StatelessWidget {
             }),
             // splashFactory: NoSplash.splashFactory,
             foregroundColor:
-                MaterialStateColor.resolveWith((states) => isSelected ? Colors.white : const Color(0xFFBBBBBB)),
-            elevation: MaterialStateProperty.resolveWith((states) => 0),
-            padding: MaterialStateProperty.resolveWith((states) => const EdgeInsets.all(16))),
+                WidgetStateColor.resolveWith((states) => isSelected ? Colors.white : const Color(0xFFBBBBBB)),
+            elevation: WidgetStateProperty.resolveWith((states) => 0),
+            padding: WidgetStateProperty.resolveWith((states) => const EdgeInsets.all(16))),
         onPressed: isSelected ? null : onPressed,
         child: Row(
           children: [

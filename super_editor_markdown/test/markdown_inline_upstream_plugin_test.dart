@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test_robots/flutter_test_robots.dart';
 import 'package:super_editor/super_editor.dart';
 import 'package:super_editor/super_editor_test.dart';
 import 'package:super_editor_markdown/src/markdown_inline_upstream_plugin.dart';
@@ -11,7 +13,7 @@ void main() {
       testWidgets("bold", (tester) async {
         final (document, _) = await _pumpScaffold(tester);
 
-        final nodeId = document.nodes.first.id;
+        final nodeId = document.first.id;
         await tester.placeCaretInParagraph(nodeId, 0);
         await tester.typeImeText("**bold**");
 
@@ -25,7 +27,7 @@ void main() {
       testWidgets("italics", (tester) async {
         final (document, _) = await _pumpScaffold(tester);
 
-        final nodeId = document.nodes.first.id;
+        final nodeId = document.first.id;
         await tester.placeCaretInParagraph(nodeId, 0);
         await tester.typeImeText("*italics*");
 
@@ -39,9 +41,21 @@ void main() {
       testWidgets("strikethrough", (tester) async {
         final (document, _) = await _pumpScaffold(tester);
 
-        final nodeId = document.nodes.first.id;
-        await tester.placeCaretInParagraph(nodeId, 20);
-        await tester.typeImeText("~strikethrough~");
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+        await tester.typeImeText("~strikethrough");
+
+        // Simulate an insertion containing a composing region.
+        await tester.ime.sendDeltas([
+          const TextEditingDeltaInsertion(
+            oldText: '. ~strikethrough',
+            textInserted: '~',
+            insertionOffset: 16,
+            selection: TextSelection.collapsed(offset: 16),
+            composing: TextRange.collapsed(16),
+          )
+        ], getter: imeClientGetter);
+        await tester.pump();
 
         expect(SuperEditorInspector.findTextInComponent(nodeId).text, "strikethrough");
         expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers.toList(), [
@@ -50,11 +64,37 @@ void main() {
         ]);
       });
 
+      testWidgets("code", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+        await tester.typeImeText("`code");
+
+        // Simulate an insertion containing a composing region.
+        await tester.ime.sendDeltas([
+          const TextEditingDeltaInsertion(
+            oldText: '. `code',
+            textInserted: '`',
+            insertionOffset: 7,
+            selection: TextSelection.collapsed(offset: 7),
+            composing: TextRange.collapsed(7),
+          )
+        ], getter: imeClientGetter);
+        await tester.pump();
+
+        expect(SuperEditorInspector.findTextInComponent(nodeId).text, "code");
+        expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers.toList(), [
+          const SpanMarker(attribution: codeAttribution, offset: 0, markerType: SpanMarkerType.start),
+          const SpanMarker(attribution: codeAttribution, offset: 3, markerType: SpanMarkerType.end),
+        ]);
+      });
+
       group("unbalanced >", () {
         testWidgets("bold then italics", (tester) async {
           final (document, _) = await _pumpScaffold(tester);
 
-          final nodeId = document.nodes.first.id;
+          final nodeId = document.first.id;
           await tester.placeCaretInParagraph(nodeId, 0);
           await tester.typeImeText("**token*");
 
@@ -65,7 +105,7 @@ void main() {
         testWidgets("italics then bold", (tester) async {
           final (document, _) = await _pumpScaffold(tester);
 
-          final nodeId = document.nodes.first.id;
+          final nodeId = document.first.id;
           await tester.placeCaretInParagraph(nodeId, 0);
           await tester.typeImeText("*token**");
 
@@ -82,7 +122,7 @@ void main() {
       testWidgets("bold", (tester) async {
         final (document, _) = await _pumpScaffold(tester, "Hello");
 
-        final nodeId = document.nodes.first.id;
+        final nodeId = document.first.id;
         await tester.placeCaretInParagraph(nodeId, 5);
 
         await tester.typeImeText(" **bold**");
@@ -97,7 +137,7 @@ void main() {
       testWidgets("italics", (tester) async {
         final (document, _) = await _pumpScaffold(tester, "Hello");
 
-        final nodeId = document.nodes.first.id;
+        final nodeId = document.first.id;
         await tester.placeCaretInParagraph(nodeId, 5);
 
         await tester.typeImeText(" *italics*");
@@ -112,7 +152,7 @@ void main() {
       testWidgets("strikethrough", (tester) async {
         final (document, _) = await _pumpScaffold(tester, "Hello");
 
-        final nodeId = document.nodes.first.id;
+        final nodeId = document.first.id;
         await tester.placeCaretInParagraph(nodeId, 5);
 
         await tester.typeImeText(" ~strikethrough~");
@@ -128,7 +168,7 @@ void main() {
         testWidgets("bold then italics", (tester) async {
           final (document, _) = await _pumpScaffold(tester, "Hello");
 
-          final nodeId = document.nodes.first.id;
+          final nodeId = document.first.id;
           await tester.placeCaretInParagraph(nodeId, 5);
           await tester.typeImeText(" **token*");
 
@@ -139,7 +179,7 @@ void main() {
         testWidgets("italics then bold", (tester) async {
           final (document, _) = await _pumpScaffold(tester, "Hello");
 
-          final nodeId = document.nodes.first.id;
+          final nodeId = document.first.id;
           await tester.placeCaretInParagraph(nodeId, 5);
           await tester.typeImeText(" *token**");
 
@@ -156,20 +196,20 @@ void main() {
       testWidgets("unbalanced italics", (tester) async {
         final (document, _) = await _pumpScaffold(tester, "");
 
-        final nodeId = document.nodes.first.id;
+        final nodeId = document.first.id;
         await tester.placeCaretInParagraph(nodeId, 0);
 
         await tester.typeImeText("**noitalics*");
 
         expect(SuperEditorInspector.findTextInComponent(nodeId).text, "**noitalics*");
-        expect((document.nodes.first as ParagraphNode).text.spans.markers.isEmpty, isTrue);
+        expect((document.first as ParagraphNode).text.spans.markers.isEmpty, isTrue);
       });
     });
 
     testWidgets("multiple styles", (tester) async {
       final (document, _) = await _pumpScaffold(tester, "Hello");
 
-      final nodeId = document.nodes.first.id;
+      final nodeId = document.first.id;
       await tester.placeCaretInParagraph(nodeId, 5);
 
       // Italics
@@ -207,7 +247,7 @@ void main() {
     testWidgets("preserves non-Markdown attributions", (tester) async {
       final (document, editor) = await _pumpScaffold(tester, "Hello *italics");
 
-      final nodeId = document.nodes.first.id;
+      final nodeId = document.first.id;
 
       // Add a non-Markdown attribution to the text.
       const colorAttribution = ColorAttribution(Color(0xFFFF0000));
@@ -248,7 +288,7 @@ void main() {
       // when given a specific ambiguous input.
       final (document, _) = await _pumpScaffold(tester, "Hello");
 
-      final nodeId = document.nodes.first.id;
+      final nodeId = document.first.id;
       await tester.placeCaretInParagraph(nodeId, 5);
 
       // "**this*" should do nothing because the downstream syntax doesn't have a
@@ -294,7 +334,7 @@ void main() {
       testWidgets("italics", (tester) async {
         final (document, _) = await _pumpScaffold(tester, "Hello italics*");
 
-        final nodeId = document.nodes.first.id;
+        final nodeId = document.first.id;
         await tester.placeCaretInParagraph(nodeId, 6);
 
         await tester.typeImeText("*");
@@ -312,7 +352,7 @@ void main() {
       testWidgets("bold", (tester) async {
         final (document, _) = await _pumpScaffold(tester, "Hello bold**");
 
-        final nodeId = document.nodes.first.id;
+        final nodeId = document.first.id;
         await tester.placeCaretInParagraph(nodeId, 6);
 
         await tester.typeImeText("*");
@@ -336,6 +376,168 @@ void main() {
         expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers.toList(), isEmpty);
       });
     });
+
+    group("does not parse syntax with empty content >", () {
+      testWidgets("bold", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+
+        // Type the trigger characters, without any content between them.
+        await tester.typeImeText("****");
+
+        // Ensure we didn't try to parse the trigger characters.
+        expect(SuperEditorInspector.findTextInComponent(nodeId).text, "****");
+        expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers, isEmpty);
+      });
+
+      testWidgets("italics > single trigger > star", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+
+        // Type the trigger characters, without any content between them.
+        await tester.typeImeText("**");
+
+        // Ensure we didn't try to parse the trigger characters.
+        expect(SuperEditorInspector.findTextInComponent(nodeId).text, "**");
+        expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers, isEmpty);
+      });
+
+      testWidgets("italics > tripple trigger > star", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+
+        // Type the trigger characters, without any content between them.
+        await tester.typeImeText("******");
+
+        // Ensure we didn't try to parse the trigger characters.
+        expect(SuperEditorInspector.findTextInComponent(nodeId).text, "******");
+        expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers, isEmpty);
+      });
+
+      testWidgets("italics > single trigger > underscore", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+
+        // Type the trigger characters, without any content between them.
+        await tester.typeImeText("__");
+
+        // Ensure we didn't try to parse the trigger characters.
+        expect(SuperEditorInspector.findTextInComponent(nodeId).text, "__");
+        expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers, isEmpty);
+      });
+
+      testWidgets("italics > tripple trigger > underscore", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+
+        // Type the trigger characters, without any content between them.
+        await tester.typeImeText("______");
+
+        // Ensure we didn't try to parse the trigger characters.
+        expect(SuperEditorInspector.findTextInComponent(nodeId).text, "______");
+        expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers, isEmpty);
+      });
+
+      testWidgets("strikethrough", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+
+        // Type the trigger characters, without any content between them.
+        await tester.typeImeText("~~");
+
+        // Ensure we didn't try to parse the trigger characters.
+        expect(SuperEditorInspector.findTextInComponent(nodeId).text, "~~");
+        expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers, isEmpty);
+      });
+
+      testWidgets("code", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+
+        // Type the trigger characters, without any content between them.
+        await tester.typeImeText("``");
+
+        // Ensure we didn't try to parse the trigger characters.
+        expect(SuperEditorInspector.findTextInComponent(nodeId).text, "``");
+        expect(SuperEditorInspector.findTextInComponent(nodeId).spans.markers, isEmpty);
+      });
+    });
+
+    group("parses Markdown link >", () {
+      testWidgets("but only when a space follows the syntax", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+
+        // Enter a link syntax, but no characters after it.
+        await tester.typeImeText("[google](www.google.com)");
+
+        // Ensure the syntax wasn't linkified.
+        var text = SuperEditorInspector.findTextInComponent(nodeId);
+        expect(text.text, "[google](www.google.com)");
+        expect(text.getAttributionSpansByFilter((a) => true), isEmpty);
+
+        // Enter a non-space character.
+        await tester.typeImeText("a");
+
+        // Ensure we still haven't linkified
+        text = SuperEditorInspector.findTextInComponent(nodeId);
+        expect(text.text, "[google](www.google.com)a");
+        expect(text.getAttributionSpansByFilter((a) => true), isEmpty);
+
+        // Enter a space after the non-space character.
+        await tester.typeImeText(" ");
+
+        // Ensure we still haven't linkified
+        text = SuperEditorInspector.findTextInComponent(nodeId);
+        expect(text.text, "[google](www.google.com)a ");
+        expect(text.getAttributionSpansByFilter((a) => true), isEmpty);
+      });
+
+      testWidgets("parses Markdown link syntax and plays nice with built-in linkification reaction", (tester) async {
+        final (document, _) = await _pumpScaffold(tester);
+
+        final nodeId = document.first.id;
+        await tester.placeCaretInParagraph(nodeId, 0);
+
+        await tester.typeImeText("[google](www.google.com) ");
+
+        // Ensure that the Markdown was parsed and replaced with a link.
+        final text = SuperEditorInspector.findTextInComponent(nodeId);
+        expect(text.text, "google ");
+        expect(text.getAttributionSpansByFilter((a) => true), {
+          const AttributionSpan(
+            attribution: LinkAttribution("www.google.com"),
+            start: 0,
+            end: 5,
+          ),
+        });
+        expect(
+          SuperEditorInspector.findDocumentSelection(),
+          DocumentSelection.collapsed(
+            position: DocumentPosition(
+              nodeId: nodeId,
+              nodePosition: const TextNodePosition(offset: 7),
+            ),
+          ),
+        );
+      });
+    });
   });
 }
 
@@ -349,8 +551,6 @@ Future<(Document, Editor)> _pumpScaffold(WidgetTester tester, [String initialMar
       home: Scaffold(
         body: SuperEditor(
           editor: editor,
-          document: document,
-          composer: composer,
           plugins: {
             MarkdownInlineUpstreamSyntaxPlugin(),
           },

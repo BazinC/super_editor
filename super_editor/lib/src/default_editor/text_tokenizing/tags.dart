@@ -5,7 +5,6 @@ import 'package:characters/characters.dart';
 import 'package:super_editor/src/core/document.dart';
 import 'package:super_editor/src/core/document_selection.dart';
 import 'package:super_editor/src/default_editor/text.dart';
-import 'package:super_editor/src/infrastructure/strings.dart';
 
 /// A set of tools for finding tags within document text.
 class TagFinder {
@@ -61,7 +60,7 @@ class TagFinder {
     // Move downstream the caret position until we find excluded character or reach the end of the text.
     while (iteratorDownstream.moveNext()) {
       final current = iteratorDownstream.current;
-      if (current != tagRule.trigger && tagRule.excludedCharacters.contains(current)) {
+      if (tagRule.excludedCharacters.contains(current)) {
         break;
       }
     }
