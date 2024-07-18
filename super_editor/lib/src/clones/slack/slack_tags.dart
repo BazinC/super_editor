@@ -613,6 +613,14 @@ class SlackTagReaction implements EditReaction {
     }
     editorSlackTagsLog.fine("Found ${nodesToInspect.length} impacted nodes with tags that might be invalid");
 
+    // Track the impact of deletions on selection bounds, then update the selection
+    // to reflect the deletions.
+    final composer = editContext.find<MutableDocumentComposer>(Editor.composerKey);
+    final selection = composer.selection;
+    if (selection == null) {
+      return;
+    }
+
     // Inspect every TextNode where a text deletion impacted a tag.
     // final removeTagRequests = <EditRequest>{};
     final deleteTagRequests = <EditRequest>{};
@@ -657,16 +665,12 @@ class SlackTagReaction implements EditReaction {
           )
           .sorted((tag1, tag2) => tag2.start - tag1.start);
 
-      // Track the impact of deletions on selection bounds, then update the selection
-      // to reflect the deletions.
-      final composer = editContext.find<MutableDocumentComposer>(Editor.composerKey);
-
-      final baseBeforeDeletions = composer.selection!.base;
+      final baseBeforeDeletions = selection.base;
       int baseOffsetAfterDeletions = baseBeforeDeletions.nodePosition is TextNodePosition
           ? (baseBeforeDeletions.nodePosition as TextNodePosition).offset
           : -1;
 
-      final extentBeforeDeletions = composer.selection!.extent;
+      final extentBeforeDeletions = selection.extent;
       int extentOffsetAfterDeletions = extentBeforeDeletions.nodePosition is TextNodePosition
           ? (extentBeforeDeletions.nodePosition as TextNodePosition).offset
           : -1;
@@ -774,11 +778,16 @@ class SlackTagReaction implements EditReaction {
     bool Function(Set<Attribution> attributions) tagSelector,
   ) {
     final composer = editContext.find<MutableDocumentComposer>(Editor.composerKey);
-    if (composer.selection == null || !composer.selection!.isCollapsed) {
-      // We only tag when the selection is collapsed. Our selection is null or expanded. Return.
+    final selection = composer.selection;
+    if (selection == null) {
       return null;
     }
-    final selectionPosition = composer.selection!.extent;
+    if (!selection.isCollapsed) {
+      // We only tag when the selection is collapsed or expanded. Return.
+      return null;
+    }
+
+    final selectionPosition = selection.extent;
     final caretPosition = selectionPosition.nodePosition;
     if (caretPosition is! TextNodePosition) {
       // Tagging only happens in the middle of text. The selected content isn't text. Return.
